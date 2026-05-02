@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LibraryOS</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Library<span>OS</span></div>
+  <div class="nav-links" id="nav-links" style="display:none">
+    <button class="nav-link active" onclick="navigate('dashboard')">Dashboard</button>
+    <button class="nav-link" onclick="navigate('books')" id="nl-books">Books</button>
+    <button class="nav-link" onclick="navigate('members')" id="nl-members">Members</button>
+    <button class="nav-link" onclick="navigate('issues')" id="nl-issues">Issued Books</button>
+    <button class="nav-link" onclick="navigate('mybooks')" id="nl-mybooks" style="display:none">My Books</button>
+  </div>
+  <div class="nav-right">
+    <span class="role-badge" id="role-badge" style="display:none"></span>
+    <button class="btn btn-primary btn-sm" id="logout-btn" style="display:none" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<!-- LOGIN PAGE -->
+<div id="login-page" class="page">
+  <div class="login-wrap">
+    <div class="login-left">
+      <h1>Library<br/><span>Management</span><br/>System</h1>
+      <p>A complete system to manage books, members, and borrowing records with fine calculation.</p>
+      <div class="demo-accounts">
+        <div class="demo-card"><strong>Admin Login</strong>Username: admin &nbsp;|&nbsp; Password: admin123</div>
+        <div class="demo-card"><strong>Student Login</strong>Username: student1 &nbsp;|&nbsp; Password: pass123</div>
+        <div class="demo-card"><strong>Student Login</strong>Username: student2 &nbsp;|&nbsp; Password: pass123</div>
+      </div>
+    </div>
+    <div class="login-right">
+      <h2>Welcome Back</h2>
+      <p>Sign in to access the library system</p>
+      <div class="input-group"><label>Username</label><input type="text" id="login-user" placeholder="Enter username"/></div>
+      <div class="input-group"><label>Password</label><input type="password" id="login-pass" placeholder="Enter password"/></div>
+      <div class="login-err" id="login-err">❌ Invalid username or password</div>
+      <button class="btn btn-accent" onclick="login()">Sign In</button>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard-page" class="page">
+  <div class="page-header">
+    <div><h2 id="dash-title">Dashboard</h2><p id="dash-sub"></p></div>
+  </div>
+  <div class="stats-grid" id="stats-grid"></div>
+  <div class="section-gap">
+    <div class="table-wrap">
+      <div class="table-toolbar"><h3 id="recent-label">Recent Activity</h3></div>
+      <div id="recent-table"></div>
+    </div>
+  </div>
+</div>
+
+<!-- BOOKS PAGE -->
+<div id="books-page" class="page">
+  <div class="page-header">
+    <div><h2>Book Catalog</h2><p>Manage all library books</p></div>
+    <button class="btn btn-primary" id="add-book-btn" onclick="openAddBook()" style="display:none">+ Add Book</button>
+  </div>
+  <div class="table-wrap">
+    <div class="table-toolbar">
+      <h3>All Books</h3>
+      <input class="search-input" placeholder="Search books..." oninput="renderBooks(this.value)" id="book-search"/>
+    </div>
+    <div id="books-table"></div>
+  </div>
+</div>
+
+<!-- MEMBERS PAGE (admin only) -->
+<div id="members-page" class="page">
+  <div class="page-header">
+    <div><h2>Members</h2><p>Registered library members</p></div>
+    <button class="btn btn-primary" onclick="openAddMember()">+ Add Member</button>
+  </div>
+  <div class="table-wrap">
+    <div class="table-toolbar">
+      <h3>All Members</h3>
+      <input class="search-input" placeholder="Search members..." oninput="renderMembers(this.value)"/>
+    </div>
+    <div id="members-table"></div>
+  </div>
+</div>
+
+<!-- ISSUED BOOKS -->
+<div id="issues-page" class="page">
+  <div class="page-header">
+    <div><h2>Issued Books</h2><p>Active borrowing records</p></div>
+    <button class="btn btn-primary" id="issue-btn" onclick="openIssueModal()" style="display:none">Issue a Book</button>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchIssueTab('active',this)">Active</button>
+    <button class="tab" onclick="switchIssueTab('overdue',this)">Overdue</button>
+    <button class="tab" onclick="switchIssueTab('returned',this)">Returned</button>
+  </div>
+  <div class="table-wrap"><div id="issues-table"></div></div>
+</div>
+
+<!-- MY BOOKS (student) -->
+<div id="mybooks-page" class="page">
+  <div class="page-header"><div><h2>My Books</h2><p>Your borrowing history</p></div></div>
+  <div class="table-wrap"><div id="mybooks-table"></div></div>
+</div>
+
+<!-- MODALS -->
+<div class="overlay" id="modal-book">
+  <div class="modal">
+    <h3 id="modal-book-title">Add New Book</h3>
+    <p>Fill in the book details below</p>
+    <div class="two-col">
+      <div class="input-group"><label>Title</label><input id="b-title" placeholder="Book title"/></div>
+      <div class="input-group"><label>Author</label><input id="b-author" placeholder="Author name"/></div>
+    </div>
+    <div class="two-col">
+      <div class="input-group"><label>ISBN</label><input id="b-isbn" placeholder="ISBN"/></div>
+      <div class="input-group"><label>Genre</label>
+        <select id="b-genre">
+          <option>Fiction</option><option>Non-Fiction</option><option>Science</option>
+          <option>Technology</option><option>History</option><option>Mathematics</option>
+          <option>Literature</option><option>Reference</option>
+        </select>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="input-group"><label>Total Copies</label><input id="b-copies" type="number" min="1" value="1"/></div>
+      <div class="input-group"><label>Published Year</label><input id="b-year" type="number" placeholder="2024"/></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-book')">Cancel</button>
+      <button class="btn btn-accent" onclick="saveBook()">Save Book</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-member">
+  <div class="modal">
+    <h3>Add New Member</h3>
+    <p>Register a new library member</p>
+    <div class="two-col">
+      <div class="input-group"><label>Full Name</label><input id="m-name" placeholder="Full name"/></div>
+      <div class="input-group"><label>Username</label><input id="m-username" placeholder="Login username"/></div>
+    </div>
+    <div class="two-col">
+      <div class="input-group"><label>Password</label><input id="m-pass" type="password" placeholder="Password"/></div>
+      <div class="input-group"><label>Email</label><input id="m-email" placeholder="email@example.com"/></div>
+    </div>
+    <div class="input-group"><label>Department</label><input id="m-dept" placeholder="e.g. Computer Science"/></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-member')">Cancel</button>
+      <button class="btn btn-accent" onclick="saveMember()">Add Member</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-issue">
+  <div class="modal">
+    <h3>Issue a Book</h3>
+    <p>Assign a book to a member</p>
+    <div class="input-group"><label>Select Member</label><select id="i-member"></select></div>
+    <div class="input-group"><label>Select Book</label><select id="i-book"></select></div>
+    <div class="input-group"><label>Due Date</label><input id="i-due" type="date"/></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-issue')">Cancel</button>
+      <button class="btn btn-accent" onclick="issueBook()">Issue Book</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-return">
+  <div class="modal">
+    <h3>Return Book</h3>
+    <p id="return-info"></p>
+    <div id="fine-display" style="display:none;background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:14px;margin-bottom:8px;font-size:14px"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-return')">Cancel</button>
+      <button class="btn btn-accent" onclick="confirmReturn()">Confirm Return</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="js/db.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/books.js"></script>
+<script src="js/members.js"></script>
+<script src="js/issues.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
